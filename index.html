@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اكتشف عطرك المثالي — Perfamix</title>
+  <meta name="description" content="اكتشف العطر المثالي ليك من Perfamix — اختبار سريع يساعدك تلاقي ريحتك المفضلة">
+
+  <!-- Fonts matching Perfamix website -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- QUIZ CONTAINER                          -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="quiz-wrapper" id="quizWrapper">
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container" id="progressContainer">
+      <div class="progress-bar" id="progressBar"></div>
+      <div class="progress-steps">
+        <span class="progress-dot active" data-step="1">١</span>
+        <span class="progress-dot" data-step="2">٢</span>
+        <span class="progress-dot" data-step="3">٣</span>
+        <span class="progress-dot" data-step="4">٤</span>
+        <span class="progress-dot" data-step="5">٥</span>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="quiz-header" id="quizHeader">
+      <div class="quiz-logo-icon">🌿</div>
+      <h1 class="quiz-title">اكتشف عطرك المثالي</h1>
+      <p class="quiz-subtitle">جاوب على كام سؤال وهنرشحلك العطر الأنسب ليك</p>
+    </div>
+
+    <!-- Quiz Steps -->
+    <div class="quiz-body">
+
+      <!-- STEP 1: Gender -->
+      <div class="quiz-step active" data-step="1" id="step1">
+        <h2 class="step-question">العطر ده لمين؟</h2>
+        <div class="options-grid options-3" id="options1">
+          <button class="option-card" data-value="male">
+            <span class="option-icon">👔</span>
+            <span class="option-label">رجالي</span>
+          </button>
+          <button class="option-card" data-value="female">
+            <span class="option-icon">👗</span>
+            <span class="option-label">حريمي</span>
+          </button>
+          <button class="option-card" data-value="unisex">
+            <span class="option-icon">✨</span>
+            <span class="option-label">يونيسكس</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Scent Family -->
+      <div class="quiz-step" data-step="2" id="step2">
+        <h2 class="step-question">بتحب العطور اللي ريحتها إيه؟</h2>
+        <div class="options-grid options-4" id="options2">
+          <button class="option-card" data-value="fresh">
+            <span class="option-icon">🌊</span>
+            <span class="option-label">فريش ومنعش</span>
+          </button>
+          <button class="option-card" data-value="woody">
+            <span class="option-icon">🌲</span>
+            <span class="option-label">خشبي</span>
+          </button>
+          <button class="option-card" data-value="oriental">
+            <span class="option-icon">🪔</span>
+            <span class="option-label">شرقي / أورينتال</span>
+          </button>
+          <button class="option-card" data-value="floral">
+            <span class="option-icon">🌹</span>
+            <span class="option-label">زهري</span>
+          </button>
+          <button class="option-card" data-value="citrus">
+            <span class="option-icon">🍋</span>
+            <span class="option-label">حمضي / ستروس</span>
+          </button>
+          <button class="option-card" data-value="gourmand">
+            <span class="option-icon">🍫</span>
+            <span class="option-label">حلو / جورماند</span>
+          </button>
+          <button class="option-card" data-value="musky">
+            <span class="option-icon">🤍</span>
+            <span class="option-label">مسكي</span>
+          </button>
+          <button class="option-card" data-value="spicy">
+            <span class="option-icon">🌶️</span>
+            <span class="option-label">توابل / سبايسي</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Occasion -->
+      <div class="quiz-step" data-step="3" id="step3">
+        <h2 class="step-question">عايزه لإيه بالظبط؟</h2>
+        <div class="options-grid options-2" id="options3">
+          <button class="option-card" data-value="daily">
+            <span class="option-icon">☀️</span>
+            <span class="option-label">كل يوم</span>
+          </button>
+          <button class="option-card" data-value="special">
+            <span class="option-icon">💎</span>
+            <span class="option-label">مناسبات خاصة</span>
+          </button>
+          <button class="option-card" data-value="night-out">
+            <span class="option-icon">🌙</span>
+            <span class="option-label">سهرات وخروجات</span>
+          </button>
+          <button class="option-card" data-value="office">
+            <span class="option-icon">💼</span>
+            <span class="option-label">الشغل</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Season -->
+      <div class="quiz-step" data-step="4" id="step4">
+        <h2 class="step-question">عايزه لموسم إيه؟</h2>
+        <div class="options-grid options-2" id="options4">
+          <button class="option-card" data-value="spring">
+            <span class="option-icon">🌸</span>
+            <span class="option-label">الربيع</span>
+          </button>
+          <button class="option-card" data-value="summer">
+            <span class="option-icon">🌞</span>
+            <span class="option-label">الصيف</span>
+          </button>
+          <button class="option-card" data-value="fall">
+            <span class="option-icon">🍂</span>
+            <span class="option-label">الخريف</span>
+          </button>
+          <button class="option-card" data-value="winter">
+            <span class="option-icon">❄️</span>
+            <span class="option-label">الشتاء</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Dislikes (multi-select) -->
+      <div class="quiz-step" data-step="5" id="step5">
+        <h2 class="step-question">إيه الريحة اللي مش بتحبها؟</h2>
+        <p class="step-hint">ممكن تختار أكتر من واحدة</p>
+        <div class="options-grid options-3 multi-select" id="options5">
+          <button class="option-card" data-value="oud">
+            <span class="option-icon">🪵</span>
+            <span class="option-label">عود</span>
+          </button>
+          <button class="option-card" data-value="spices">
+            <span class="option-icon">🌶️</span>
+            <span class="option-label">توابل</span>
+          </button>
+          <button class="option-card" data-value="vanilla">
+            <span class="option-icon">🍦</span>
+            <span class="option-label">فانيلا</span>
+          </button>
+          <button class="option-card" data-value="musk">
+            <span class="option-icon">🤍</span>
+            <span class="option-label">مسك</span>
+          </button>
+          <button class="option-card" data-value="floral">
+            <span class="option-icon">🌸</span>
+            <span class="option-label">زهور</span>
+          </button>
+          <button class="option-card" data-value="tobacco">
+            <span class="option-icon">🚬</span>
+            <span class="option-label">تبغ / دخان</span>
+          </button>
+          <button class="option-card" data-value="leather">
+            <span class="option-icon">🧥</span>
+            <span class="option-label">جلد</span>
+          </button>
+          <button class="option-card" data-value="citrus">
+            <span class="option-icon">🍊</span>
+            <span class="option-label">حمضيات</span>
+          </button>
+          <button class="option-card option-card-skip" data-value="nothing">
+            <span class="option-icon">💚</span>
+            <span class="option-label">مفيش، بحب كل حاجة</span>
+          </button>
+        </div>
+        <button class="btn-next" id="btnNext5" disabled>التالي ←</button>
+      </div>
+
+    </div>
+
+    <!-- Back Button -->
+    <button class="btn-back" id="btnBack" style="display: none;">→ رجوع</button>
+
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- RESULTS SECTION                         -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="results-wrapper" id="resultsWrapper" style="display: none;">
+    <div class="results-header">
+      <div class="results-icon">🎉</div>
+      <h2 class="results-title">العطور المثالية ليك</h2>
+      <p class="results-subtitle">بناءً على اختياراتك، دي أفضل ٣ عطور تناسب ذوقك</p>
+    </div>
+
+    <div class="results-grid" id="resultsGrid">
+      <!-- Perfume cards will be injected here by JS -->
+    </div>
+
+    <button class="btn-restart" id="btnRestart">
+      🔄 جرّب تاني
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- NO RESULTS FALLBACK                     -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="no-results-wrapper" id="noResultsWrapper" style="display: none;">
+    <div class="no-results-content">
+      <div class="no-results-icon">😔</div>
+      <h2 class="no-results-title">مفيش نتايج</h2>
+      <p class="no-results-text">للأسف مفيش عطر مطابق لاختياراتك دلوقتي. جرّب تغير بعض الإجابات!</p>
+      <button class="btn-restart" id="btnRestartNoResults">
+        🔄 جرّب تاني
+      </button>
+    </div>
+  </div>
+
+  <script src="perfumes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
