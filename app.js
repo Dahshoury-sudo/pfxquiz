@@ -299,8 +299,8 @@
           const badNotes = DISLIKE_NOTE_GROUPS[dislike] || [];
           for (const note of p.notes) {
             if (badNotes.includes(note.toLowerCase())) {
-              score -= 10;
-              scoreDetails.push(`-10 (مكون غير مفضل: ${note})`);
+              score -= 4;
+              scoreDetails.push(`-4 (مكون غير مفضل: ${note})`);
             }
           }
         }
@@ -339,10 +339,16 @@
       return { perfume: p, score, scoreDetails };
     });
 
-    // Sort by score descending, then shuffle ties
+    // Sort by score descending, then prefer exact gender match, then shuffle ties
     scored.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
-      return Math.random() - 0.5; // randomize ties
+      // Tiebreaker: exact gender match ranks above unisex
+      if (answers.gender !== 'unisex') {
+        const aExact = a.perfume.gender === answers.gender ? 1 : 0;
+        const bExact = b.perfume.gender === answers.gender ? 1 : 0;
+        if (bExact !== aExact) return bExact - aExact;
+      }
+      return Math.random() - 0.5; // randomize remaining ties
     });
 
     // Filter out heavily penalized perfumes (score < 0)
@@ -412,7 +418,7 @@
   // The matching logic already explains itself, but only to the console.
   // This says the same thing to the customer, and every claim it makes
   // is checkable against scorePerfumes(): scent family first (+5/+3/+1),
-  // then occasion (+4), then season (+3), with disliked notes at -10
+  // then occasion (+4), then season (+3), with disliked notes at -4
   // each and anything at or below zero dropped.
   // ─────────────────────────────────────────────
 
