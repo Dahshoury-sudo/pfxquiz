@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تجربة الكويز — محاكاة موقع Perfamix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Jost:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: #f5f5f5;
+      color: #1B2A20;
+      direction: rtl;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Fake WP Navbar ── */
+    .wp-nav {
+      background: #264E36;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .wp-nav .logo {
+      font-family: 'Jost', sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #FAF8F4;
+    }
+
+    .wp-nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .wp-nav-links a {
+      color: rgba(250, 248, 244, 0.75);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      transition: color 200ms;
+    }
+
+    .wp-nav-links a:hover { color: #FAF8F4; }
+
+    /* ── Page Content ── */
+    .page-header {
+      max-width: 900px;
+      margin: 40px auto 24px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      font-size: 15px;
+      color: #666;
+    }
+
+    /* ── Quiz iframe ── */
+    .quiz-wrapper {
+      max-width: 1140px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+      flex: 1;
+      width: 100%;
+    }
+
+    #perfamix-quiz {
+      width: 100%;
+      border: none;
+      overflow: hidden;
+      display: block;
+      min-height: 400px;
+      transition: height 300ms ease;
+    }
+
+    /* ── Fake Footer ── */
+    .wp-footer {
+      background: #1B3E29;
+      color: rgba(250, 248, 244, 0.6);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 14px;
+    }
+
+    /* ── Label ── */
+    .test-badge {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      background: #e74c3c;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 999;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 600px) {
+      .wp-nav { padding: 14px 16px; }
+      .wp-nav-links { gap: 16px; }
+      .wp-nav-links a { font-size: 13px; }
+      .page-header { margin-top: 24px; }
+      .page-header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Simulated WordPress navbar -->
+  <nav class="wp-nav">
+    <span class="logo">Perfamix</span>
+    <ul class="wp-nav-links">
+      <li><a href="#">الرئيسية</a></li>
+      <li><a href="#">العطور</a></li>
+      <li><a href="#">عروض</a></li>
+      <li><a href="#">تواصل معنا</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <h1>اكتشف عطرك المثالي</h1>
+    <p>جاوب على ٥ أسئلة سريعة وهنرشحلك أفضل العطور اللي تناسب ذوقك</p>
+  </div>
+
+  <!-- The quiz iframe — same as the WordPress embed -->
+  <div class="quiz-wrapper">
+    <iframe
+      id="perfamix-quiz"
+      src="index.html"
+      scrolling="no"
+      allowtransparency="true"
+      title="اختبار اختيار العطر — Perfamix"
+    ></iframe>
+  </div>
+
+  <!-- Simulated WordPress footer -->
+  <footer class="wp-footer">
+    Perfamix © 2026 — هذه صفحة تجربة محلية فقط
+  </footer>
+
+  <div class="test-badge">⚠ وضع التجربة — مش الموقع الحقيقي</div>
+
+  <!-- Same listener from wordpress-embed.html -->
+  <script>
+  (function () {
+    var iframe = document.getElementById('perfamix-quiz');
+
+    window.addEventListener('message', function (e) {
+      if (!e.data || typeof e.data !== 'object') return;
+
+      if (e.data.type === 'perfamix-resize' && typeof e.data.height === 'number') {
+        iframe.style.height = e.data.height + 'px';
+      }
+
+      if (e.data.type === 'perfamix-scroll-top') {
+        var rect = iframe.getBoundingClientRect();
+        var top = rect.top + window.pageYOffset - 20;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  })();
+  </script>
+
+</body>
+</html>

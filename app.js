@@ -91,12 +91,15 @@
   }
 
   function scrollToTop() {
-    if (IS_IFRAME) {
-      // Ask the parent page to scroll to the iframe's top
-      window.parent.postMessage({ type: 'perfamix-scroll-top' }, '*');
-    }
     if (window.scrollY === 0) return;
     window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  }
+
+  /** Ask the parent page to scroll to the iframe — only on major view changes. */
+  function scrollParentToQuiz() {
+    if (IS_IFRAME) {
+      window.parent.postMessage({ type: 'perfamix-scroll-top' }, '*');
+    }
   }
 
   /** The Arabic label the customer actually saw and pressed, read back
@@ -466,6 +469,7 @@
       setView('empty');
       emptyTitle.focus();
       scrollToTop();
+      scrollParentToQuiz();
       return;
     }
 
@@ -482,6 +486,7 @@
     setView('results');
     resultsTitle.focus();
     scrollToTop();
+    scrollParentToQuiz();
   }
 
   // ─────────────────────────────────────────────
@@ -511,20 +516,29 @@
   function setupIframeBridge() {
     if (!IS_IFRAME) return;
 
-    // Hide overflow so the iframe never shows its own scrollbar
+    // Blend with the parent page — no visible iframe boundary
     document.documentElement.style.overflow = 'hidden';
+    document.body.style.background = 'transparent';
 
     // Send the content height to the parent whenever it changes
+    let resizeTimer = null;
+    let lastHeight = 0;
     function postHeight() {
-      const h = document.documentElement.scrollHeight;
-      window.parent.postMessage({ type: 'perfamix-resize', height: h }, '*');
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        const h = document.body.scrollHeight;
+        if (h !== lastHeight) {
+          lastHeight = h;
+          window.parent.postMessage({ type: 'perfamix-resize', height: h }, '*');
+        }
+      }, 60);
     }
 
-    // Observe the whole document for size changes
+    // Observe the body for size changes
     const ro = new ResizeObserver(postHeight);
-    ro.observe(document.documentElement);
+    ro.observe(document.body);
 
-    // Also post on load and after any transition/animation
+    // Also post on load (fonts, images)
     postHeight();
     window.addEventListener('load', postHeight);
   }
