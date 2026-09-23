@@ -1,0 +1,47 @@
+<!--
+  Perfamix Quiz — WordPress Embed
+  ────────────────────────────────
+  Copy everything below into a "Custom HTML" block
+  on the WooCommerce page where you want the quiz.
+
+  Replace YOUR_QUIZ_URL with the actual hosted URL
+  of your quiz (e.g. https://quiz.perfamix.com).
+-->
+
+<iframe
+  id="perfamix-quiz"
+  src="https://pfxquiz.webvitas.com"
+  style="
+    width: 100%;
+    border: none;
+    overflow: hidden;
+    display: block;
+    min-height: 500px;
+    transition: height 300ms ease;
+  "
+  scrolling="no"
+  allowtransparency="true"
+  title="اختبار اختيار العطر — Perfamix"
+></iframe>
+
+<script>
+(function () {
+  var iframe = document.getElementById('perfamix-quiz');
+
+  window.addEventListener('message', function (e) {
+    if (!e.data || typeof e.data !== 'object') return;
+
+    // Auto-resize: the quiz posts its content height
+    if (e.data.type === 'perfamix-resize' && typeof e.data.height === 'number') {
+      iframe.style.height = e.data.height + 'px';
+    }
+
+    // Scroll-to-top: when the quiz changes step or shows results
+    if (e.data.type === 'perfamix-scroll-top') {
+      var rect = iframe.getBoundingClientRect();
+      var top = rect.top + window.pageYOffset - 20; // 20px breathing room
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    }
+  });
+})();
+</script>

@@ -38,6 +38,7 @@
   // ─────────────────────────────────────────────
   const TOTAL_STEPS = 5;
   const ADVANCE_DELAY = 320;
+  const IS_IFRAME = window !== window.parent;
 
   let currentStep = 1;
   let advanceTimer = null;
@@ -90,6 +91,10 @@
   }
 
   function scrollToTop() {
+    if (IS_IFRAME) {
+      // Ask the parent page to scroll to the iframe's top
+      window.parent.postMessage({ type: 'perfamix-scroll-top' }, '*');
+    }
     if (window.scrollY === 0) return;
     window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
   }
@@ -501,6 +506,30 @@
   }
 
   // ─────────────────────────────────────────────
+  // Iframe bridge — seamless embedding
+  // ─────────────────────────────────────────────
+  function setupIframeBridge() {
+    if (!IS_IFRAME) return;
+
+    // Hide overflow so the iframe never shows its own scrollbar
+    document.documentElement.style.overflow = 'hidden';
+
+    // Send the content height to the parent whenever it changes
+    function postHeight() {
+      const h = document.documentElement.scrollHeight;
+      window.parent.postMessage({ type: 'perfamix-resize', height: h }, '*');
+    }
+
+    // Observe the whole document for size changes
+    const ro = new ResizeObserver(postHeight);
+    ro.observe(document.documentElement);
+
+    // Also post on load and after any transition/animation
+    postHeight();
+    window.addEventListener('load', postHeight);
+  }
+
+  // ─────────────────────────────────────────────
   // Initialize
   // ─────────────────────────────────────────────
   function init() {
@@ -511,6 +540,7 @@
     document.querySelectorAll('.js-restart').forEach(btn => btn.addEventListener('click', restart));
     btnFinish.addEventListener('click', showResults);
 
+    setupIframeBridge();
     showStep(1, false);
   }
 
