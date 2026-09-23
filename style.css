@@ -1,725 +1,711 @@
-/* ═══════════════════════════════════════════════════════
-   Perfamix Quiz — Style System
-   Matches perfamix.com brand identity
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   Perfamix Quiz — design system
 
-/* ── CSS Variables ── */
+   Brand-matched to perfamix.com: deep green, gold accents, ivory
+   grounds, flat surfaces. Presence comes from the green band, the
+   gold rules and the type scale — not from elevation. There are no
+   drop shadows and no hover lift anywhere in this file.
+
+   Deliberately single-theme. This is a brand surface that always
+   renders light, so every colour is painted explicitly rather than
+   inherited from the host.
+   ═══════════════════════════════════════════════════════════════ */
+
 :root {
-  --green: #264E36;
-  --green-dark: #1B3E29;
-  --green-light: #3a6b4a;
-  --green-ultra-light: #e8f0eb;
-  --gold: #C8A05A;
-  --white: #FFFFFF;
-  --bg: #F7F7F7;
-  --bg-card: #FFFFFF;
-  --border: #e8e8e8;
-  --text-dark: #264E36;
-  --text-body: #444444;
-  --text-muted: #888888;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --font-heading: 'Jost', sans-serif;
-  --font-body: 'Manrope', sans-serif;
+  color-scheme: light;
+
+  /* ── Palette ── */
+  --green:      #264E36;  /* brand */
+  --green-deep: #1B3E29;  /* masthead ground, CTA hover */
+  --green-dim:  #143020;  /* progress track on the green band */
+  --ivory:      #FAF8F4;  /* page ground */
+  --paper:      #FFFFFF;  /* cards, packshot tiles */
+  --ink:        #1B2A20;  /* primary text — near-black, biased green */
+  --muted:      #5F6B61;  /* secondary text — 5.0:1 on ivory, AA */
+  --rule:       #D8D2C6;  /* hairlines */
+  --rule-firm:  #B9B1A1;  /* card borders */
+
+  /* Gold measures 2.29:1 on ivory — it fails even the 3:1 large-text
+     threshold, so it is never text on the ivory ground. On the green
+     band it measures 4.94:1 and passes AA. --gold-ink (4.57:1 on
+     ivory) exists for the places that want gold *type* off the band. */
+  --gold:       #C8A05A;
+  --gold-ink:   #8F6B2E;
+
+  /* ── Type ── */
+  --font-display: 'El Messiri', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --font-body:    'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --font-lat:     'Jost', 'Segoe UI', system-ui, sans-serif;
+
+  /* ── Metrics ── */
+  --measure: 42rem;        /* quiz column */
+  --measure-wide: 68rem;   /* results column */
+  --radius: 4px;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* ── Reset & Base ── */
+/* ── Reset ── */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
+  margin: 0;
+  background: var(--ivory);
+  color: var(--ink);
   font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text-body);
-  line-height: 1.6;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;          /* Arabic wants more air than Latin */
   direction: rtl;
-  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Quiz Wrapper ── */
-.quiz-wrapper {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 24px 20px 40px;
-  min-height: 100vh;
+h1, h2, h3, p, figure {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Keyboard focus — the pre-redesign build set outline:none with no
+   replacement, which made the whole quiz unusable by keyboard. */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+/* On the green band the green ring would disappear into the ground. */
+.masthead :focus-visible {
+  outline-color: var(--gold);
+}
+
+/* ═══════════════════════════════════════════
+   MASTHEAD
+   ═══════════════════════════════════════════ */
+
+.masthead {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--green-deep);
+}
+
+.masthead-inner {
+  max-width: var(--measure-wide);
+  margin-inline: auto;
+  padding: 16px 20px 15px;
   display: flex;
-  flex-direction: column;
-}
-
-/* ── Progress Bar ── */
-.progress-bar-container {
-  position: relative;
-  margin-bottom: 32px;
-}
-
-.progress-bar {
-  height: 4px;
-  background: var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.progress-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: var(--progress, 20%);
-  background: var(--green);
-  border-radius: 4px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.progress-steps {
-  display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  margin-top: 12px;
-  padding: 0 4px;
+  gap: 16px;
 }
 
-.progress-dot {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--white);
-  border: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
+/* Latin micro-label. Tracking belongs here and nowhere near the
+   Arabic — Arabic is cursive and letter-spacing severs the joins. */
+.wordmark {
+  font-family: var(--font-lat);
   font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  transition: all var(--transition);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ivory);
 }
 
-.progress-dot.active {
-  background: var(--green);
-  border-color: var(--green);
-  color: var(--white);
-  box-shadow: 0 0 0 4px rgba(38, 78, 54, 0.15);
+.step-counter {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(250, 248, 244, 0.65);
+  font-variant-numeric: tabular-nums;
 }
 
-.progress-dot.completed {
-  background: var(--green);
-  border-color: var(--green);
-  color: var(--white);
-}
-
-/* ── Quiz Header ── */
-.quiz-header {
-  text-align: center;
-  margin-bottom: 36px;
-}
-
-.quiz-logo-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
-  animation: gentle-float 3s ease-in-out infinite;
-}
-
-@keyframes gentle-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-.quiz-title {
-  font-family: var(--font-heading);
-  font-size: 28px;
+.step-counter .now {
+  color: var(--gold);
   font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 8px;
-  letter-spacing: -0.3px;
 }
 
-.quiz-subtitle {
-  font-size: 15px;
-  color: var(--text-muted);
-  font-weight: 400;
+/* Hairline progress. The counter already states how many steps there
+   are, so this only has to carry position — no dots. */
+.progress {
+  height: 2px;
+  background: var(--green-dim);
 }
 
-/* ── Quiz Body / Steps ── */
-.quiz-body {
-  flex: 1;
-  position: relative;
+.progress-fill {
+  height: 100%;
+  width: 20%;
+  background: var(--gold);
+  transition: width 400ms var(--ease);
+}
+
+.masthead[data-view="results"] .step-counter,
+.masthead[data-view="results"] .progress-fill {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════
+   QUIZ
+   ═══════════════════════════════════════════ */
+
+.quiz {
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: 20px;
+  padding-block: clamp(40px, 7vw, 68px) 64px;
 }
 
 .quiz-step {
   display: none;
-  animation: step-enter 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.quiz-step.active {
+.quiz-step.is-active {
   display: block;
+  animation: fade-in 180ms var(--ease);
 }
 
-@keyframes step-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-.step-question {
-  font-family: var(--font-heading);
-  font-size: 22px;
+.question {
+  margin-block-end: clamp(28px, 4vw, 40px);
+}
+
+.question-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.4rem + 2.4vw, 2.75rem);
   font-weight: 600;
-  color: var(--text-dark);
-  text-align: center;
-  margin-bottom: 8px;
+  line-height: 1.4;
+  color: var(--ink);
+  text-wrap: balance;
 }
 
-.step-hint {
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 24px;
-  font-weight: 400;
+/* Focus target when a step advances — never draws a ring on click,
+   only when focus was moved programmatically for keyboard users. */
+.question-title:focus {
+  outline: none;
 }
 
-.step-question + .options-grid {
-  margin-top: 24px;
+.question-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin-block-start: 18px;
+  background: var(--gold);
 }
 
-/* ── Options Grid ── */
-.options-grid {
+.question-note {
+  margin-block-start: 14px;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+/* ── Option grids ── */
+
+.options {
   display: grid;
   gap: 12px;
 }
 
-.options-grid.options-2 {
-  grid-template-columns: 1fr 1fr;
-}
+.options--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.options--two   { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.options--four  { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
-.options-grid.options-3 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
+/* ── Option card ── */
 
-.options-grid.options-4 {
-  grid-template-columns: 1fr 1fr;
-}
-
-/* ── Option Card ── */
-.option-card {
-  background: var(--bg-card);
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 12px;
-  cursor: pointer;
+.option {
+  position: relative;
   display: flex;
   flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 20px 18px;
+  text-align: start;
+  background: var(--paper);
+  border: 1.5px solid var(--rule-firm);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--ease),
+    background-color 160ms var(--ease),
+    color 160ms var(--ease);
+}
+
+/* Compact variant for the self-explanatory steps (gender, season,
+   dislikes) — centred, name only, no descriptor to carry. */
+.option--compact {
   align-items: center;
-  gap: 10px;
-  transition: all var(--transition);
-  font-family: var(--font-body);
-  outline: none;
-  position: relative;
-  overflow: hidden;
-}
-
-.option-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  background: var(--green-ultra-light);
-  opacity: 0;
-  transition: opacity var(--transition);
-  z-index: 0;
-}
-
-.option-card:hover {
-  border-color: var(--green-light);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.option-card:hover::before {
-  opacity: 1;
-}
-
-.option-card:active {
-  transform: translateY(0);
-}
-
-.option-card.selected {
-  border-color: var(--green);
-  background: var(--green-ultra-light);
-  box-shadow: 0 0 0 3px rgba(38, 78, 54, 0.15);
-}
-
-.option-card.selected::after {
-  content: '✓';
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 22px;
-  height: 22px;
-  background: var(--green);
-  color: var(--white);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  animation: check-pop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes check-pop {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-.option-icon {
-  font-size: 28px;
-  position: relative;
-  z-index: 1;
-}
-
-.option-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-dark);
   text-align: center;
-  position: relative;
-  z-index: 1;
-  line-height: 1.4;
+  padding: 24px 12px;
 }
 
-/* Skip option (مفيش بحب كل حاجة) */
-.option-card-skip {
+.option:hover {
+  border-color: var(--green);
+}
+
+.option-name {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink);
+  transition: color 160ms var(--ease);
+}
+
+.option-note {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--muted);
+  transition: color 160ms var(--ease);
+}
+
+/* Selection inverts the card. No checkmark badge needed — the
+   inversion is unambiguous, and it drops a bouncing animation. */
+.option[aria-checked="true"],
+.option[aria-pressed="true"] {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.option[aria-checked="true"] .option-name,
+.option[aria-pressed="true"] .option-name {
+  color: var(--ivory);
+}
+
+.option[aria-checked="true"] .option-note,
+.option[aria-pressed="true"] .option-note {
+  color: rgba(250, 248, 244, 0.78);
+}
+
+/* "مفيش، بحب كل حاجة" — spans the row, reads as an opt-out rather
+   than another sibling choice. */
+.option--optout {
   grid-column: 1 / -1;
-  flex-direction: row;
-  justify-content: center;
-  padding: 14px 20px;
-  background: var(--bg);
+  align-items: center;
+  text-align: center;
+  padding: 16px;
+  background: transparent;
   border-style: dashed;
+  border-color: var(--rule-firm);
 }
 
-.option-card-skip .option-icon {
-  font-size: 22px;
+.option--optout .option-name {
+  font-weight: 500;
+  color: var(--muted);
 }
 
-.option-card-skip .option-label {
-  font-size: 14px;
-}
-
-.option-card-skip.selected {
-  background: var(--green-ultra-light);
+.option--optout[aria-pressed="true"] {
+  background: var(--green);
   border-style: solid;
 }
 
-/* ── Multi-select Next Button ── */
-.btn-next {
-  display: block;
-  margin: 28px auto 0;
-  padding: 14px 48px;
-  background: var(--green);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-heading);
-  font-size: 16px;
-  font-weight: 600;
+.option--optout[aria-pressed="true"] .option-name {
+  font-weight: 700;
+  color: var(--ivory);
+}
+
+/* ── Step actions ── */
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block-start: 32px;
+}
+
+.actions--end {
+  justify-content: flex-end;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 15px 30px;
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all var(--transition);
-  letter-spacing: 0.3px;
+  transition:
+    background-color 160ms var(--ease),
+    border-color 160ms var(--ease),
+    color 160ms var(--ease);
 }
 
-.btn-next:hover:not(:disabled) {
-  background: var(--green-dark);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+.btn--primary {
+  background: var(--green);
+  color: var(--ivory);
+  border: 1.5px solid var(--green);
 }
 
-.btn-next:disabled {
-  opacity: 0.4;
+.btn--primary:hover:not(:disabled) {
+  background: var(--green-deep);
+  border-color: var(--green-deep);
+}
+
+.btn--primary:disabled {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--rule-firm);
   cursor: not-allowed;
 }
 
-/* ── Back Button ── */
-.btn-back {
-  display: block;
-  margin: 24px auto 0;
-  padding: 10px 32px;
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 14px;
+.btn--quiet {
+  padding-inline: 6px;
   font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition);
+  color: var(--muted);
+  border: none;
 }
 
-.btn-back:hover {
+.btn--quiet:hover {
   color: var(--green);
-  border-color: var(--green);
-  background: var(--green-ultra-light);
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--green);
+  border: 1.5px solid var(--green);
+}
+
+.btn--outline:hover {
+  background: var(--green);
+  color: var(--ivory);
+}
+
+/* Chevrons are drawn, not typed. Arrow glyphs are bidi-neutral —
+   they reposition in RTL but never mirror, so "التالي ←" is a coin
+   flip across browsers. */
+.chev {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  fill: none;
 }
 
 /* ═══════════════════════════════════════════
    RESULTS
    ═══════════════════════════════════════════ */
 
-.results-wrapper {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px 20px 60px;
+.results {
+  max-width: var(--measure-wide);
+  margin-inline: auto;
+  padding-inline: 20px;
+  padding-block: clamp(40px, 7vw, 68px) 80px;
 }
 
-.results-header {
-  text-align: center;
-  margin-bottom: 40px;
-  animation: fade-in-up 0.6s ease-out;
+.results-head {
+  margin-block-end: clamp(32px, 5vw, 48px);
+  padding-block-end: 24px;
+  border-block-end: 2px solid var(--rule);
 }
 
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.results-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
+.eyebrow {
+  display: block;
+  font-family: var(--font-lat);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  margin-block-end: 14px;
 }
 
 .results-title {
-  font-family: var(--font-heading);
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 8px;
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.4rem + 2.4vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: balance;
 }
 
-.results-subtitle {
-  font-size: 15px;
-  color: var(--text-muted);
-  font-weight: 400;
+.results-title:focus {
+  outline: none;
 }
 
-/* ── Results Grid ── */
+.results-note {
+  margin-block-start: 12px;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-bottom: 36px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
 }
 
-/* ── Perfume Card ── */
-.perfume-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: all var(--transition);
-  animation: card-reveal 0.5s ease-out backwards;
+/* ── Perfume card ── */
+.perfume {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-.perfume-card:nth-child(1) { animation-delay: 0.1s; }
-.perfume-card:nth-child(2) { animation-delay: 0.25s; }
-.perfume-card:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes card-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.perfume-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
-}
-
-.perfume-card-rank {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  background: var(--green);
-  color: var(--white);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-size: 14px;
-  font-weight: 700;
-  z-index: 2;
-}
-
-.perfume-card-image-wrapper {
+.perfume-figure {
   position: relative;
-  width: 100%;
+  margin: 0;
   aspect-ratio: 1;
-  background: var(--bg);
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
-.perfume-card-image {
+/* position:relative puts the packshot in the same painting layer as
+   the fallback below it, where tree order decides — and the img comes
+   second, so it lands on top. Without this the absolutely-positioned
+   fallback covers every packshot unconditionally. */
+.perfume-figure img {
+  position: relative;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.perfume-card:hover .perfume-card-image {
-  transform: scale(1.08);
-}
-
-.perfume-card-body {
-  padding: 16px;
-  flex: 1;
+/* Typographic tile behind the packshot. app.js hides the img on a
+   load error, which reveals this — the real production fallback, so
+   it gets designed rather than hidden. */
+.perfume-fallback {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: var(--paper);
 }
 
-.perfume-card-name {
-  font-family: var(--font-heading);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 8px;
-  line-height: 1.3;
+.perfume-fallback::after {
+  content: '';
+  width: 32px;
+  height: 2px;
+  background: var(--gold);
 }
 
-.perfume-card-description {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 16px;
+.perfume-fallback span {
+  font-family: var(--font-lat);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.perfume-body {
+  display: flex;
+  flex-direction: column;
   flex: 1;
-  /* Clamp to 3 lines */
+  gap: 6px;
+  padding-block-start: 18px;
+}
+
+/* Ranking eyebrow. Sits in the body rather than over the packshot —
+   these are product shots on near-white grounds, so a numeral on the
+   image would drop out. */
+.perfume-rank {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--gold-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.perfume-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.perfume-notes {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.perfume-desc {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--muted);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* Pairs with the 6px body gap for a 16px minimum above the CTA,
+     which the auto margin below can only ever grow. */
+  margin-block-end: 10px;
 }
 
-.perfume-card-tags {
+/* Full-width bar rather than a quiet link — this is the one action
+   the whole quiz exists to produce. The auto margin pins it to the
+   bottom so CTAs line up across a row of uneven descriptions. */
+.perfume-cta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-
-.perfume-tag {
-  padding: 3px 10px;
-  background: var(--green-ultra-light);
-  color: var(--green);
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--font-heading);
-}
-
-.perfume-card-cta {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background: var(--green);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-heading);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition);
-  text-decoration: none;
-  text-align: center;
-  letter-spacing: 0.3px;
-}
-
-.perfume-card-cta:hover {
-  background: var(--green-dark);
-  box-shadow: var(--shadow-md);
-}
-
-/* ── Match Score Badge ── */
-.perfume-card-match {
-  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: var(--gold);
-  color: var(--white);
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  font-family: var(--font-heading);
-  margin-bottom: 10px;
-  width: fit-content;
-}
-
-/* ── Restart Button ── */
-.btn-restart {
-  display: block;
-  margin: 0 auto;
-  padding: 14px 40px;
-  background: transparent;
-  color: var(--green);
-  border: 2px solid var(--green);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-heading);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-
-.btn-restart:hover {
+  justify-content: center;
+  gap: 8px;
+  margin-block-start: auto;
+  padding: 14px 16px;
   background: var(--green);
-  color: var(--white);
-  box-shadow: var(--shadow-md);
-}
-
-/* ── No Results ── */
-.no-results-wrapper {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.no-results-icon {
-  font-size: 60px;
-  margin-bottom: 16px;
-}
-
-.no-results-title {
-  font-family: var(--font-heading);
-  font-size: 24px;
+  color: var(--ivory);
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 8px;
+  text-decoration: none;
+  transition: background-color 160ms var(--ease);
 }
 
-.no-results-text {
-  font-size: 15px;
-  color: var(--text-muted);
-  margin-bottom: 28px;
+.perfume-cta:hover {
+  background: var(--green-deep);
+}
+
+.perfume-cta:hover .cta-arrow {
+  transform: translate(-2px, -2px);
+}
+
+.cta-arrow {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  fill: none;
+  transition: transform 160ms var(--ease);
+}
+
+.results-footer {
+  display: flex;
+  justify-content: center;
+  margin-block-start: clamp(40px, 6vw, 60px);
+}
+
+/* ═══════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════ */
+
+.empty {
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: 20px;
+  padding-block: clamp(56px, 12vw, 120px) 80px;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 1.3rem + 1.6vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.empty-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin-block-start: 18px;
+  background: var(--gold);
+}
+
+.empty-text {
+  margin-block-start: 16px;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+.empty-actions {
+  margin-block-start: 32px;
 }
 
 /* ═══════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════ */
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .results-grid {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .perfume-card-image-wrapper {
-    aspect-ratio: 4/3;
-  }
-
-  .quiz-title {
-    font-size: 24px;
-  }
-
-  .step-question {
-    font-size: 20px;
-  }
-
-  .options-grid.options-3 {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .options-grid.options-4 {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .option-card {
-    padding: 16px 10px;
-  }
-
-  .option-icon {
-    font-size: 24px;
-  }
-
-  .option-label {
-    font-size: 13px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
   }
 }
 
-@media (max-width: 420px) {
-  .quiz-wrapper {
-    padding: 16px 14px 32px;
+@media (max-width: 600px) {
+  /* Descriptor lines need the full width to stay on two lines. */
+  .options--two {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .options-grid.options-3 {
-    grid-template-columns: 1fr 1fr;
+  .options--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .option-card {
-    padding: 14px 8px;
-    gap: 6px;
+  .option {
+    padding: 18px 16px;
   }
 
-  .option-icon {
-    font-size: 22px;
-  }
-
-  .option-label {
-    font-size: 12px;
-  }
-
-  .progress-dot {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
-
-  .quiz-title {
-    font-size: 21px;
-  }
-
-  .step-question {
-    font-size: 18px;
+  .option--compact {
+    padding: 20px 12px;
   }
 
   .results-grid {
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    max-width: 23rem;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .options--three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .btn {
+    padding-inline: 20px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

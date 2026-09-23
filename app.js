@@ -1,6 +1,6 @@
 /**
- * app.js — Perfamix Quiz Logic
- * Handles step navigation, scoring algorithm, and result rendering.
+ * app.js — Perfamix Quiz
+ * Step navigation, matching algorithm, and result rendering.
  */
 
 (function () {
@@ -21,10 +21,27 @@
   };
 
   // ─────────────────────────────────────────────
+  // Tag display names (Arabic)
+  // ─────────────────────────────────────────────
+  const TAG_LABELS = {
+    // Scent
+    fresh: 'فريش', woody: 'خشبي', oriental: 'شرقي', floral: 'زهري',
+    citrus: 'حمضي', gourmand: 'حلو', musky: 'مسكي', spicy: 'توابل',
+    // Occasion
+    daily: 'يومي', special: 'مناسبات', 'night-out': 'سهرات', office: 'شغل',
+    // Season
+    spring: 'ربيع', summer: 'صيف', fall: 'خريف', winter: 'شتاء',
+  };
+
+  // ─────────────────────────────────────────────
   // State
   // ─────────────────────────────────────────────
   const TOTAL_STEPS = 5;
+  const ADVANCE_DELAY = 320;
+
   let currentStep = 1;
+  let advanceTimer = null;
+
   const answers = {
     gender: null,      // step 1
     scent: null,       // step 2
@@ -36,141 +53,202 @@
   // ─────────────────────────────────────────────
   // DOM refs
   // ─────────────────────────────────────────────
-  const quizWrapper = document.getElementById('quizWrapper');
-  const resultsWrapper = document.getElementById('resultsWrapper');
-  const noResultsWrapper = document.getElementById('noResultsWrapper');
-  const progressBar = document.getElementById('progressBar');
-  const btnBack = document.getElementById('btnBack');
-  const btnNext5 = document.getElementById('btnNext5');
-  const btnRestart = document.getElementById('btnRestart');
-  const btnRestartNoResults = document.getElementById('btnRestartNoResults');
-  const resultsGrid = document.getElementById('resultsGrid');
+  const masthead     = document.getElementById('masthead');
+  const quiz         = document.getElementById('quiz');
+  const results      = document.getElementById('results');
+  const empty        = document.getElementById('empty');
+  const progressBar  = document.querySelector('.progress');
+  const progressFill = document.getElementById('progressFill');
+  const stepNow      = document.getElementById('stepNow');
+  const resultsGrid  = document.getElementById('resultsGrid');
+  const resultsNote  = document.getElementById('resultsNote');
+  const resultsTitle = document.getElementById('resultsTitle');
+  const emptyTitle   = document.getElementById('emptyTitle');
+  const btnFinish    = document.getElementById('btnFinish');
+
+  const steps = Array.from(document.querySelectorAll('.quiz-step'));
+
+  // ─────────────────────────────────────────────
+  // Helpers
+  // ─────────────────────────────────────────────
+  const AR_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+
+  /** 3 → "٠٣" — Arabic-Indic digits, as used across the page. */
+  function arNum(n, pad) {
+    const s = String(n).padStart(pad || 0, '0');
+    return s.replace(/\d/g, d => AR_DIGITS[+d]);
+  }
+
+  const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+  /** The catalogue is generated from Products.xlsx, so names and
+   *  descriptions are external content going into innerHTML. */
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, c => HTML_ESCAPES[c]);
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function scrollToTop() {
+    if (window.scrollY === 0) return;
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  }
 
   // ─────────────────────────────────────────────
   // Progress
   // ─────────────────────────────────────────────
   function updateProgress() {
-    const pct = (currentStep / TOTAL_STEPS) * 100;
-    progressBar.style.setProperty('--progress', pct + '%');
-
-    document.querySelectorAll('.progress-dot').forEach(dot => {
-      const step = parseInt(dot.dataset.step);
-      dot.classList.remove('active', 'completed');
-      if (step === currentStep) dot.classList.add('active');
-      else if (step < currentStep) dot.classList.add('completed');
-    });
+    progressFill.style.width = (currentStep / TOTAL_STEPS) * 100 + '%';
+    progressBar.setAttribute('aria-valuenow', String(currentStep));
+    stepNow.textContent = arNum(currentStep, 2);
   }
 
   // ─────────────────────────────────────────────
-  // Step Navigation
+  // Step navigation
   // ─────────────────────────────────────────────
-  function showStep(step) {
+  function showStep(step, moveFocus) {
     currentStep = step;
 
-    document.querySelectorAll('.quiz-step').forEach(el => {
-      el.classList.remove('active');
+    steps.forEach(el => {
+      el.classList.toggle('is-active', Number(el.dataset.step) === step);
     });
 
-    const stepEl = document.querySelector(`.quiz-step[data-step="${step}"]`);
-    if (stepEl) {
-      stepEl.classList.add('active');
-      // Re-trigger animation
-      stepEl.style.animation = 'none';
-      stepEl.offsetHeight; // force reflow
-      stepEl.style.animation = '';
-    }
+    const active = steps.find(el => Number(el.dataset.step) === step);
+    if (active) {
+      const group = active.querySelector('[data-select="single"]');
+      if (group) syncRovingTabindex(group);
 
-    // Back button visibility
-    btnBack.style.display = step > 1 ? 'block' : 'none';
+      // Keyboard and screen-reader users would otherwise be stranded on
+      // the option they just activated, which no longer exists on screen.
+      if (moveFocus) {
+        const title = active.querySelector('.question-title');
+        if (title) title.focus();
+      }
+    }
 
     updateProgress();
+    scrollToTop();
   }
 
-  function goToNextStep() {
-    if (currentStep < TOTAL_STEPS) {
-      showStep(currentStep + 1);
-    } else {
-      showResults();
-    }
+  function goNext() {
+    if (currentStep < TOTAL_STEPS) showStep(currentStep + 1, true);
+    else showResults();
   }
 
-  function goToPrevStep() {
-    if (currentStep > 1) {
-      showStep(currentStep - 1);
-    }
+  function goBack() {
+    if (currentStep > 1) showStep(currentStep - 1, true);
   }
 
   // ─────────────────────────────────────────────
-  // Option Selection — Single Select (Steps 1,2,4,5)
+  // Single select (steps 1–4)
+  //
+  // Buttons carry role="radio", so they need the roving tabindex the
+  // pattern expects. Selection is manual rather than following focus:
+  // choosing an option advances the step, which is too large a
+  // consequence to trigger on an arrow key.
   // ─────────────────────────────────────────────
-  function setupSingleSelect(stepNum, answerKey) {
-    const container = document.getElementById('options' + stepNum);
-    if (!container) return;
+  function radiosOf(group) {
+    return Array.from(group.querySelectorAll('[role="radio"]'));
+  }
 
-    container.addEventListener('click', (e) => {
-      const card = e.target.closest('.option-card');
-      if (!card) return;
+  function syncRovingTabindex(group) {
+    const radios = radiosOf(group);
+    if (!radios.length) return;
+    const checked = radios.find(r => r.getAttribute('aria-checked') === 'true');
+    radios.forEach(r => { r.tabIndex = -1; });
+    (checked || radios[0]).tabIndex = 0;
+  }
 
-      // Deselect all in this step
-      container.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+  function setupSingleSelect(group) {
+    const key = group.dataset.answer;
 
-      // Select this one
-      card.classList.add('selected');
-      answers[answerKey] = card.dataset.value;
+    group.addEventListener('click', e => {
+      const option = e.target.closest('[role="radio"]');
+      if (!option || !group.contains(option)) return;
 
-      // Auto-advance after brief delay
-      setTimeout(() => {
-        goToNextStep();
-      }, 350);
+      radiosOf(group).forEach(r => r.setAttribute('aria-checked', 'false'));
+      option.setAttribute('aria-checked', 'true');
+      answers[key] = option.dataset.value;
+      syncRovingTabindex(group);
+
+      clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(goNext, ADVANCE_DELAY);
     });
-  }
 
-  // ─────────────────────────────────────────────
-  // Option Selection — Multi Select (Step 5: dislikes)
-  // ─────────────────────────────────────────────
-  function setupMultiSelect() {
-    const container = document.getElementById('options5');
-    if (!container) return;
+    group.addEventListener('keydown', e => {
+      const radios = radiosOf(group);
+      const index = radios.indexOf(document.activeElement);
+      if (index === -1) return;
 
-    container.addEventListener('click', (e) => {
-      const card = e.target.closest('.option-card');
-      if (!card) return;
-
-      const value = card.dataset.value;
-
-      if (value === 'nothing') {
-        // "مفيش بحب كل حاجة" — deselect everything, select only this
-        container.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        answers.dislikes = ['nothing'];
-      } else {
-        // Deselect "nothing" if selected
-        const nothingCard = container.querySelector('[data-value="nothing"]');
-        if (nothingCard) nothingCard.classList.remove('selected');
-        answers.dislikes = answers.dislikes.filter(v => v !== 'nothing');
-
-        // Toggle this card
-        if (card.classList.contains('selected')) {
-          card.classList.remove('selected');
-          answers.dislikes = answers.dislikes.filter(v => v !== value);
-        } else {
-          card.classList.add('selected');
-          answers.dislikes.push(value);
-        }
+      let next;
+      switch (e.key) {
+        // The page is RTL, so the next sibling sits to the left.
+        case 'ArrowLeft':
+        case 'ArrowDown':
+          next = radios[(index + 1) % radios.length];
+          break;
+        case 'ArrowRight':
+        case 'ArrowUp':
+          next = radios[(index - 1 + radios.length) % radios.length];
+          break;
+        case 'Home':
+          next = radios[0];
+          break;
+        case 'End':
+          next = radios[radios.length - 1];
+          break;
+        default:
+          return;
       }
 
-      // Enable/disable next button
-      btnNext5.disabled = answers.dislikes.length === 0;
+      e.preventDefault();
+      radios.forEach(r => { r.tabIndex = -1; });
+      next.tabIndex = 0;
+      next.focus();
     });
 
-    // Next button for step 5
-    btnNext5.addEventListener('click', () => {
-      goToNextStep();
+    syncRovingTabindex(group);
+  }
+
+  // ─────────────────────────────────────────────
+  // Multi select (step 5 — dislikes)
+  // ─────────────────────────────────────────────
+  function setupMultiSelect(group) {
+    const options = Array.from(group.querySelectorAll('[aria-pressed]'));
+
+    function setPressed(option, pressed) {
+      option.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    }
+
+    group.addEventListener('click', e => {
+      const option = e.target.closest('[aria-pressed]');
+      if (!option || !group.contains(option)) return;
+
+      const value = option.dataset.value;
+
+      if (value === 'nothing') {
+        options.forEach(o => setPressed(o, o === option));
+        answers.dislikes = ['nothing'];
+      } else {
+        const optOut = options.find(o => o.dataset.value === 'nothing');
+        if (optOut) setPressed(optOut, false);
+        answers.dislikes = answers.dislikes.filter(v => v !== 'nothing');
+
+        const nowPressed = option.getAttribute('aria-pressed') !== 'true';
+        setPressed(option, nowPressed);
+        answers.dislikes = nowPressed
+          ? answers.dislikes.concat(value)
+          : answers.dislikes.filter(v => v !== value);
+      }
+
+      btnFinish.disabled = answers.dislikes.length === 0;
     });
   }
 
   // ─────────────────────────────────────────────
-  // Matching Algorithm
+  // Matching algorithm
   // ─────────────────────────────────────────────
   function scorePerfumes() {
     console.group("=== تفاصيل الفلترة وحساب النقاط ===");
@@ -266,126 +344,109 @@
   }
 
   // ─────────────────────────────────────────────
-  // Tag display names (Arabic)
+  // Render results
   // ─────────────────────────────────────────────
-  const TAG_LABELS = {
-    // Scent
-    fresh: 'فريش', woody: 'خشبي', oriental: 'شرقي', floral: 'زهري',
-    citrus: 'حمضي', gourmand: 'حلو', musky: 'مسكي', spicy: 'توابل',
-    // Occasion
-    daily: 'يومي', special: 'مناسبات', 'night-out': 'سهرات', office: 'شغل',
-    // Season
-    spring: 'ربيع', summer: 'صيف', fall: 'خريف', winter: 'شتاء',
-  };
+  const CTA_ARROW = '<svg class="cta-arrow" viewBox="0 0 11 11" aria-hidden="true">' +
+    '<path d="M8.5 8.5 L2.5 2.5 M2.5 7.5 L2.5 2.5 L7.5 2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-  // ─────────────────────────────────────────────
-  // Render Results
-  // ─────────────────────────────────────────────
+  function perfumeCard(result, index) {
+    const p = result.perfume;
+
+    const notes = []
+      .concat((p.tags.scent || []).slice(0, 2))
+      .concat((p.tags.season || []).slice(0, 1))
+      .map(t => TAG_LABELS[t] || t)
+      .join(' · ');
+
+    return `
+      <article class="perfume">
+        <figure class="perfume-figure">
+          <div class="perfume-fallback"><span>${esc(p.name)}</span></div>
+          <img src="${esc(p.image)}" alt="عطر ${esc(p.name)}" loading="lazy" width="300" height="300">
+        </figure>
+        <div class="perfume-body">
+          <span class="perfume-rank">${arNum(index + 1, 2)}</span>
+          <h2 class="perfume-name">${esc(p.name)}</h2>
+          <p class="perfume-notes">${esc(notes)}</p>
+          <p class="perfume-desc">${esc(p.description)}</p>
+          <a class="perfume-cta" href="${esc(p.url)}" target="_blank" rel="noopener">
+            <span>اطلب الآن</span>${CTA_ARROW}
+          </a>
+        </div>
+      </article>
+    `;
+  }
+
+  /** Reveal the typographic tile behind any packshot that fails. */
+  function watchImages(root) {
+    root.querySelectorAll('img').forEach(img => {
+      if (img.complete && img.naturalWidth === 0) img.hidden = true;
+      else img.addEventListener('error', () => { img.hidden = true; }, { once: true });
+    });
+  }
+
+  function setView(view) {
+    masthead.dataset.view = view;
+    quiz.hidden = view !== 'quiz';
+    results.hidden = view !== 'results';
+    empty.hidden = view !== 'empty';
+  }
+
   function showResults() {
-    const results = scorePerfumes();
+    const picks = scorePerfumes();
 
-    quizWrapper.style.display = 'none';
-
-    if (results.length === 0) {
-      noResultsWrapper.style.display = 'block';
-      resultsWrapper.style.display = 'none';
+    if (!picks.length) {
+      setView('empty');
+      emptyTitle.focus();
+      scrollToTop();
       return;
     }
 
-    resultsWrapper.style.display = 'block';
-    noResultsWrapper.style.display = 'none';
+    const inStock = PERFUMES.filter(p => p.in_stock).length;
 
-    // Calculate match percentage (based on max possible score: 5+4+3 = 12)
-    const maxScore = 12;
+    resultsGrid.innerHTML = picks.map(perfumeCard).join('');
+    watchImages(resultsGrid);
+    resultsNote.textContent =
+      `من ${arNum(inStock)} عطر متاح، دي أقرب ${arNum(picks.length)} لاختياراتك.`;
 
-    resultsGrid.innerHTML = results.map((result, index) => {
-      const p = result.perfume;
-      const matchPct = Math.min(100, Math.round((result.score / maxScore) * 100));
-
-      // Tags to display
-      const tagsList = [
-        ...(p.tags.scent || []).slice(0, 2).map(t => TAG_LABELS[t] || t),
-        ...(p.tags.season || []).slice(0, 1).map(t => TAG_LABELS[t] || t),
-      ];
-
-      return `
-        <div class="perfume-card">
-          <div class="perfume-card-image-wrapper">
-            <div class="perfume-card-rank">${index + 1}</div>
-            <img 
-              class="perfume-card-image" 
-              src="${p.image}" 
-              alt="${p.name}"
-              loading="lazy"
-              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22200%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2214%22>لا توجد صورة</text></svg>'"
-            >
-          </div>
-          <div class="perfume-card-body">
-            <h3 class="perfume-card-name">${p.name}</h3>
-            <p class="perfume-card-description">${p.description}</p>
-            <div class="perfume-card-tags">
-              ${tagsList.map(t => `<span class="perfume-tag">${t}</span>`).join('')}
-            </div>
-            <a href="${p.url}" target="_blank" rel="noopener" class="perfume-card-cta">
-              اطلب الآن
-            </a>
-          </div>
-        </div>
-      `;
-    }).join('');
+    setView('results');
+    resultsTitle.focus();
+    scrollToTop();
   }
 
   // ─────────────────────────────────────────────
   // Restart
   // ─────────────────────────────────────────────
   function restart() {
-    // Reset answers
     answers.gender = null;
     answers.scent = null;
-    answers.dislikes = [];
     answers.occasion = null;
     answers.season = null;
+    answers.dislikes = [];
 
-    // Clear selections
-    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-    btnNext5.disabled = true;
+    document.querySelectorAll('[role="radio"]').forEach(o => o.setAttribute('aria-checked', 'false'));
+    document.querySelectorAll('[aria-pressed]').forEach(o => o.setAttribute('aria-pressed', 'false'));
+    btnFinish.disabled = true;
+    resultsGrid.innerHTML = '';
 
-    // Show quiz, hide results
-    quizWrapper.style.display = 'flex';
-    resultsWrapper.style.display = 'none';
-    noResultsWrapper.style.display = 'none';
-
-    showStep(1);
-
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setView('quiz');
+    showStep(1, true);
   }
 
   // ─────────────────────────────────────────────
   // Initialize
   // ─────────────────────────────────────────────
   function init() {
-    // Setup single-select steps
-    setupSingleSelect(1, 'gender');
-    setupSingleSelect(2, 'scent');
-    setupSingleSelect(3, 'occasion');
-    setupSingleSelect(4, 'season');
+    document.querySelectorAll('[data-select="single"]').forEach(setupSingleSelect);
+    document.querySelectorAll('[data-select="multi"]').forEach(setupMultiSelect);
 
-    // Setup multi-select step
-    setupMultiSelect();
+    document.querySelectorAll('.js-back').forEach(btn => btn.addEventListener('click', goBack));
+    document.querySelectorAll('.js-restart').forEach(btn => btn.addEventListener('click', restart));
+    btnFinish.addEventListener('click', showResults);
 
-    // Back button
-    btnBack.addEventListener('click', goToPrevStep);
-
-    // Restart buttons
-    btnRestart.addEventListener('click', restart);
-    btnRestartNoResults.addEventListener('click', restart);
-
-    // Initial state
-    showStep(1);
+    showStep(1, false);
   }
 
-  // Wait for DOM
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

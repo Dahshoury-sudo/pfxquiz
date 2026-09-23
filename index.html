@@ -6,230 +6,237 @@
   <title>اكتشف عطرك المثالي — Perfamix</title>
   <meta name="description" content="اكتشف العطر المثالي ليك من Perfamix — اختبار سريع يساعدك تلاقي ريحتك المفضلة">
 
-  <!-- Fonts matching Perfamix website -->
+  <!-- El Messiri sets the display Arabic, Tajawal the running text.
+       Jost is used only for the Latin micro-labels, matching the
+       perfamix.com wordmark. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600&family=Tajawal:wght@400;500;700&family=Jost:wght@500&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ════════════════════════════════════════ -->
-  <!-- QUIZ CONTAINER                          -->
-  <!-- ════════════════════════════════════════ -->
-  <div class="quiz-wrapper" id="quizWrapper">
-
-    <!-- Progress Bar -->
-    <div class="progress-bar-container" id="progressContainer">
-      <div class="progress-bar" id="progressBar"></div>
-      <div class="progress-steps">
-        <span class="progress-dot active" data-step="1">١</span>
-        <span class="progress-dot" data-step="2">٢</span>
-        <span class="progress-dot" data-step="3">٣</span>
-        <span class="progress-dot" data-step="4">٤</span>
-        <span class="progress-dot" data-step="5">٥</span>
-      </div>
+  <header class="masthead" id="masthead" data-view="quiz">
+    <div class="masthead-inner">
+      <span class="wordmark">Perfamix</span>
+      <span class="step-counter" id="stepCounter">
+        <span class="now" id="stepNow">٠١</span> ⁄ ٠٥
+      </span>
     </div>
-
-    <!-- Header -->
-    <div class="quiz-header" id="quizHeader">
-      <div class="quiz-logo-icon">🌿</div>
-      <h1 class="quiz-title">اكتشف عطرك المثالي</h1>
-      <p class="quiz-subtitle">جاوب على كام سؤال وهنرشحلك العطر الأنسب ليك</p>
+    <div class="progress"
+         role="progressbar"
+         aria-label="تقدّمك في الاختبار"
+         aria-valuemin="1"
+         aria-valuemax="5"
+         aria-valuenow="1">
+      <div class="progress-fill" id="progressFill"></div>
     </div>
+  </header>
 
-    <!-- Quiz Steps -->
-    <div class="quiz-body">
+  <!-- ══════════════════════════════════════════
+       QUIZ
+       ══════════════════════════════════════════ -->
+  <main class="quiz" id="quiz">
 
-      <!-- STEP 1: Gender -->
-      <div class="quiz-step active" data-step="1" id="step1">
-        <h2 class="step-question">العطر ده لمين؟</h2>
-        <div class="options-grid options-3" id="options1">
-          <button class="option-card" data-value="male">
-            <span class="option-icon">👔</span>
-            <span class="option-label">رجالي</span>
-          </button>
-          <button class="option-card" data-value="female">
-            <span class="option-icon">👗</span>
-            <span class="option-label">حريمي</span>
-          </button>
-          <button class="option-card" data-value="unisex">
-            <span class="option-icon">✨</span>
-            <span class="option-label">يونيسكس</span>
-          </button>
-        </div>
+    <!-- STEP 1 — gender -->
+    <section class="quiz-step is-active" data-step="1" aria-labelledby="q1">
+      <div class="question">
+        <h1 class="question-title" id="q1" tabindex="-1">العطر ده لمين؟</h1>
       </div>
-
-      <!-- STEP 2: Scent Family -->
-      <div class="quiz-step" data-step="2" id="step2">
-        <h2 class="step-question">بتحب العطور اللي ريحتها إيه؟</h2>
-        <div class="options-grid options-4" id="options2">
-          <button class="option-card" data-value="fresh">
-            <span class="option-icon">🌊</span>
-            <span class="option-label">فريش ومنعش</span>
-          </button>
-          <button class="option-card" data-value="woody">
-            <span class="option-icon">🌲</span>
-            <span class="option-label">خشبي</span>
-          </button>
-          <button class="option-card" data-value="oriental">
-            <span class="option-icon">🪔</span>
-            <span class="option-label">شرقي / أورينتال</span>
-          </button>
-          <button class="option-card" data-value="floral">
-            <span class="option-icon">🌹</span>
-            <span class="option-label">زهري</span>
-          </button>
-          <button class="option-card" data-value="citrus">
-            <span class="option-icon">🍋</span>
-            <span class="option-label">حمضي / ستروس</span>
-          </button>
-          <button class="option-card" data-value="gourmand">
-            <span class="option-icon">🍫</span>
-            <span class="option-label">حلو / جورماند</span>
-          </button>
-          <button class="option-card" data-value="musky">
-            <span class="option-icon">🤍</span>
-            <span class="option-label">مسكي</span>
-          </button>
-          <button class="option-card" data-value="spicy">
-            <span class="option-icon">🌶️</span>
-            <span class="option-label">توابل / سبايسي</span>
-          </button>
-        </div>
+      <div class="options options--three" role="radiogroup" aria-labelledby="q1" data-select="single" data-answer="gender">
+        <button type="button" class="option option--compact" role="radio" aria-checked="false" data-value="male">
+          <span class="option-name">رجالي</span>
+        </button>
+        <button type="button" class="option option--compact" role="radio" aria-checked="false" data-value="female">
+          <span class="option-name">حريمي</span>
+        </button>
+        <button type="button" class="option option--compact" role="radio" aria-checked="false" data-value="unisex">
+          <span class="option-name">يونيسكس</span>
+        </button>
       </div>
+    </section>
 
-      <!-- STEP 3: Occasion -->
-      <div class="quiz-step" data-step="3" id="step3">
-        <h2 class="step-question">عايزه لإيه بالظبط؟</h2>
-        <div class="options-grid options-2" id="options3">
-          <button class="option-card" data-value="daily">
-            <span class="option-icon">☀️</span>
-            <span class="option-label">كل يوم</span>
-          </button>
-          <button class="option-card" data-value="special">
-            <span class="option-icon">💎</span>
-            <span class="option-label">مناسبات خاصة</span>
-          </button>
-          <button class="option-card" data-value="night-out">
-            <span class="option-icon">🌙</span>
-            <span class="option-label">سهرات وخروجات</span>
-          </button>
-          <button class="option-card" data-value="office">
-            <span class="option-icon">💼</span>
-            <span class="option-label">الشغل</span>
-          </button>
-        </div>
+    <!-- STEP 2 — scent family -->
+    <section class="quiz-step" data-step="2" aria-labelledby="q2">
+      <div class="question">
+        <h1 class="question-title" id="q2" tabindex="-1">بتحب العطور اللي ريحتها إيه؟</h1>
       </div>
-
-      <!-- STEP 4: Season -->
-      <div class="quiz-step" data-step="4" id="step4">
-        <h2 class="step-question">عايزه لموسم إيه؟</h2>
-        <div class="options-grid options-2" id="options4">
-          <button class="option-card" data-value="spring">
-            <span class="option-icon">🌸</span>
-            <span class="option-label">الربيع</span>
-          </button>
-          <button class="option-card" data-value="summer">
-            <span class="option-icon">🌞</span>
-            <span class="option-label">الصيف</span>
-          </button>
-          <button class="option-card" data-value="fall">
-            <span class="option-icon">🍂</span>
-            <span class="option-label">الخريف</span>
-          </button>
-          <button class="option-card" data-value="winter">
-            <span class="option-icon">❄️</span>
-            <span class="option-label">الشتاء</span>
-          </button>
-        </div>
+      <div class="options options--two" role="radiogroup" aria-labelledby="q2" data-select="single" data-answer="scent">
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="fresh">
+          <span class="option-name">فريش ومنعش</span>
+          <span class="option-note">خفيف ونضيف، يريّح في الحر</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="woody">
+          <span class="option-name">خشبي</span>
+          <span class="option-note">دافي وعميق، ريحة ثابتة</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="oriental">
+          <span class="option-name">شرقي / أورينتال</span>
+          <span class="option-note">غني وجريء، بيلفت</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="floral">
+          <span class="option-name">زهري</span>
+          <span class="option-note">ناعم ورومانسي</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="citrus">
+          <span class="option-name">حمضي / ستروس</span>
+          <span class="option-note">لمون وبرغموت، يفتح النفس</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="gourmand">
+          <span class="option-name">حلو / جورماند</span>
+          <span class="option-note">فانيليا وكراميل، دافي</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="musky">
+          <span class="option-name">مسكي</span>
+          <span class="option-note">نضيف وهادي، قريب من الجلد</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="spicy">
+          <span class="option-name">توابل / سبايسي</span>
+          <span class="option-note">هيل وفلفل، دفا حاد</span>
+        </button>
       </div>
-
-      <!-- STEP 5: Dislikes (multi-select) -->
-      <div class="quiz-step" data-step="5" id="step5">
-        <h2 class="step-question">إيه الريحة اللي مش بتحبها؟</h2>
-        <p class="step-hint">ممكن تختار أكتر من واحدة</p>
-        <div class="options-grid options-3 multi-select" id="options5">
-          <button class="option-card" data-value="oud">
-            <span class="option-icon">🪵</span>
-            <span class="option-label">عود</span>
-          </button>
-          <button class="option-card" data-value="spices">
-            <span class="option-icon">🌶️</span>
-            <span class="option-label">توابل</span>
-          </button>
-          <button class="option-card" data-value="vanilla">
-            <span class="option-icon">🍦</span>
-            <span class="option-label">فانيلا</span>
-          </button>
-          <button class="option-card" data-value="musk">
-            <span class="option-icon">🤍</span>
-            <span class="option-label">مسك</span>
-          </button>
-          <button class="option-card" data-value="floral">
-            <span class="option-icon">🌸</span>
-            <span class="option-label">زهور</span>
-          </button>
-          <button class="option-card" data-value="tobacco">
-            <span class="option-icon">🚬</span>
-            <span class="option-label">تبغ / دخان</span>
-          </button>
-          <button class="option-card" data-value="leather">
-            <span class="option-icon">🧥</span>
-            <span class="option-label">جلد</span>
-          </button>
-          <button class="option-card" data-value="citrus">
-            <span class="option-icon">🍊</span>
-            <span class="option-label">حمضيات</span>
-          </button>
-          <button class="option-card option-card-skip" data-value="nothing">
-            <span class="option-icon">💚</span>
-            <span class="option-label">مفيش، بحب كل حاجة</span>
-          </button>
-        </div>
-        <button class="btn-next" id="btnNext5" disabled>التالي ←</button>
+      <div class="actions">
+        <button type="button" class="btn btn--quiet js-back">
+          <svg class="chev" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 2.5 L10 7 L5.5 11.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          رجوع
+        </button>
       </div>
+    </section>
 
+    <!-- STEP 3 — occasion -->
+    <section class="quiz-step" data-step="3" aria-labelledby="q3">
+      <div class="question">
+        <h1 class="question-title" id="q3" tabindex="-1">عايزه لإيه بالظبط؟</h1>
+      </div>
+      <div class="options options--two" role="radiogroup" aria-labelledby="q3" data-select="single" data-answer="occasion">
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="daily">
+          <span class="option-name">كل يوم</span>
+          <span class="option-note">خفيف ومايتقلش</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="special">
+          <span class="option-name">مناسبات خاصة</span>
+          <span class="option-note">حضور قوي</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="night-out">
+          <span class="option-name">سهرات وخروجات</span>
+          <span class="option-note">دافي وبيفضل لوقت طويل</span>
+        </button>
+        <button type="button" class="option" role="radio" aria-checked="false" data-value="office">
+          <span class="option-name">الشغل</span>
+          <span class="option-note">محترم وهادي</span>
+        </button>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn--quiet js-back">
+          <svg class="chev" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 2.5 L10 7 L5.5 11.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          رجوع
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4 — season -->
+    <section class="quiz-step" data-step="4" aria-labelledby="q4">
+      <div class="question">
+        <h1 class="question-title" id="q4" tabindex="-1">عايزه لموسم إيه؟</h1>
+      </div>
+      <div class="options options--four" role="radiogroup" aria-labelledby="q4" data-select="single" data-answer="season">
+        <button type="button" class="option option--compact" role="radio" aria-checked="false" data-value="spring">
+          <span class="option-name">الربيع</span>
+        </button>
+        <button type="button" class="option option--compact" role="radio" aria-checked="false" data-value="summer">
+          <span class="option-name">الصيف</span>
+        </button>
+        <button type="button" class="option option--compact" role="radio" aria-checked="false" data-value="fall">
+          <span class="option-name">الخريف</span>
+        </button>
+        <button type="button" class="option option--compact" role="radio" aria-checked="false" data-value="winter">
+          <span class="option-name">الشتاء</span>
+        </button>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn--quiet js-back">
+          <svg class="chev" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 2.5 L10 7 L5.5 11.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          رجوع
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 5 — dislikes (multi-select) -->
+    <section class="quiz-step" data-step="5" aria-labelledby="q5">
+      <div class="question">
+        <h1 class="question-title" id="q5" tabindex="-1">إيه الريحة اللي مش بتحبها؟</h1>
+        <p class="question-note">ممكن تختار أكتر من واحدة</p>
+      </div>
+      <div class="options options--three" role="group" aria-labelledby="q5" data-select="multi">
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="oud">
+          <span class="option-name">عود</span>
+        </button>
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="spices">
+          <span class="option-name">توابل</span>
+        </button>
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="vanilla">
+          <span class="option-name">فانيلا</span>
+        </button>
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="musk">
+          <span class="option-name">مسك</span>
+        </button>
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="floral">
+          <span class="option-name">زهور</span>
+        </button>
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="tobacco">
+          <span class="option-name">تبغ / دخان</span>
+        </button>
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="leather">
+          <span class="option-name">جلد</span>
+        </button>
+        <button type="button" class="option option--compact" aria-pressed="false" data-value="citrus">
+          <span class="option-name">حمضيات</span>
+        </button>
+        <button type="button" class="option option--optout" aria-pressed="false" data-value="nothing">
+          <span class="option-name">مفيش، بحب كل حاجة</span>
+        </button>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn--quiet js-back">
+          <svg class="chev" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 2.5 L10 7 L5.5 11.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          رجوع
+        </button>
+        <button type="button" class="btn btn--primary" id="btnFinish" disabled>
+          شوف الترشيحات
+          <svg class="chev" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.5 2.5 L4 7 L8.5 11.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       RESULTS
+       ══════════════════════════════════════════ -->
+  <section class="results" id="results" hidden aria-live="polite">
+    <div class="results-head">
+      <span class="eyebrow">Perfamix Edit</span>
+      <h1 class="results-title" id="resultsTitle" tabindex="-1">الترشيحات اللي تناسب ذوقك</h1>
+      <p class="results-note" id="resultsNote"></p>
     </div>
-
-    <!-- Back Button -->
-    <button class="btn-back" id="btnBack" style="display: none;">→ رجوع</button>
-
-  </div>
-
-  <!-- ════════════════════════════════════════ -->
-  <!-- RESULTS SECTION                         -->
-  <!-- ════════════════════════════════════════ -->
-  <div class="results-wrapper" id="resultsWrapper" style="display: none;">
-    <div class="results-header">
-      <div class="results-icon">🎉</div>
-      <h2 class="results-title">العطور المثالية ليك</h2>
-      <p class="results-subtitle">بناءً على اختياراتك، دي أفضل ٣ عطور تناسب ذوقك</p>
+    <div class="results-grid" id="resultsGrid"></div>
+    <div class="results-footer">
+      <button type="button" class="btn btn--outline js-restart">ابدأ من الأول</button>
     </div>
+  </section>
 
-    <div class="results-grid" id="resultsGrid">
-      <!-- Perfume cards will be injected here by JS -->
+  <!-- ══════════════════════════════════════════
+       EMPTY STATE
+       ══════════════════════════════════════════ -->
+  <section class="empty" id="empty" hidden aria-live="polite">
+    <span class="eyebrow">Perfamix Edit</span>
+    <h1 class="empty-title" id="emptyTitle" tabindex="-1">مفيش نتيجة مطابقة</h1>
+    <p class="empty-text">اختياراتك ضيّقة شوية على المتاح دلوقتي. جرّب تشيل واحدة من الريحة اللي مش بتحبها، أو تغيّر الموسم.</p>
+    <div class="empty-actions">
+      <button type="button" class="btn btn--outline js-restart">ابدأ من الأول</button>
     </div>
-
-    <button class="btn-restart" id="btnRestart">
-      🔄 جرّب تاني
-    </button>
-  </div>
-
-  <!-- ════════════════════════════════════════ -->
-  <!-- NO RESULTS FALLBACK                     -->
-  <!-- ════════════════════════════════════════ -->
-  <div class="no-results-wrapper" id="noResultsWrapper" style="display: none;">
-    <div class="no-results-content">
-      <div class="no-results-icon">😔</div>
-      <h2 class="no-results-title">مفيش نتايج</h2>
-      <p class="no-results-text">للأسف مفيش عطر مطابق لاختياراتك دلوقتي. جرّب تغير بعض الإجابات!</p>
-      <button class="btn-restart" id="btnRestartNoResults">
-        🔄 جرّب تاني
-      </button>
-    </div>
-  </div>
+  </section>
 
   <script src="perfumes.js"></script>
   <script src="app.js"></script>
