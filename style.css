@@ -608,6 +608,70 @@ img {
   transition: transform 160ms var(--ease);
 }
 
+/* ── Rationale ──
+   Deliberately not a fourth card. Three white bordered cards sit
+   directly above this, so the same treatment would read as a broken
+   product tile. The green slab makes it a different kind of object —
+   an editorial aside — and bookends the page against the masthead,
+   which is the same green. It also lets gold be *type* here: 4.94:1
+   on --green-deep, against 2.29:1 on the ivory ground. */
+
+.rationale {
+  margin-block-start: clamp(48px, 7vw, 72px);
+  padding: clamp(28px, 5vw, 44px);
+  background: var(--green-deep);
+  border-radius: var(--radius);
+}
+
+.rationale-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.625rem);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ivory);
+}
+
+/* Same 40px gold rule that closes .question and .empty-title. */
+.rationale-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  margin-block-start: 16px;
+  background: var(--gold);
+}
+
+/* max-content puts the label column at the start edge — the right, in
+   RTL — which is the reading order these pairs want. */
+.rationale-choices {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 20px;
+  margin-block: 24px 0;
+}
+
+.rationale-choices dt {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.75;
+  color: var(--gold);
+}
+
+/* Browsers indent dd by 40px by default. */
+.rationale-choices dd {
+  margin: 0;
+  font-weight: 500;
+  color: var(--ivory);
+}
+
+.rationale-text {
+  max-width: 60ch;
+  margin-block-start: 26px;
+  font-size: 0.9375rem;
+  line-height: 1.85;
+  color: rgba(250, 248, 244, 0.8);   /* ≈7.2:1 on the green */
+}
+
 .results-footer {
   display: flex;
   justify-content: center;

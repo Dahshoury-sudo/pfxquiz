@@ -63,6 +63,8 @@
   const resultsGrid  = document.getElementById('resultsGrid');
   const resultsNote  = document.getElementById('resultsNote');
   const resultsTitle = document.getElementById('resultsTitle');
+  const rationaleChoices = document.getElementById('rationaleChoices');
+  const rationaleText    = document.getElementById('rationaleText');
   const emptyTitle   = document.getElementById('emptyTitle');
   const btnFinish    = document.getElementById('btnFinish');
 
@@ -94,6 +96,24 @@
   function scrollToTop() {
     if (window.scrollY === 0) return;
     window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  }
+
+  /** The Arabic label the customer actually saw and pressed, read back
+   *  off the option itself. TAG_LABELS can't serve here: it has no
+   *  gender entries, and where it overlaps step 5 it disagrees with the
+   *  buttons (floral → 'زهري' vs the button's 'زهور'). Reading the
+   *  markup keeps one source for this copy instead of two that drift. */
+  function chosenLabel(key) {
+    const group = document.querySelector('[data-answer="' + key + '"]');
+    const name = group && group.querySelector('[aria-checked="true"] .option-name');
+    return name ? name.textContent.trim() : '';
+  }
+
+  function chosenDislikeLabels() {
+    const pressed = document.querySelectorAll(
+      '[data-select="multi"] [aria-pressed="true"] .option-name'
+    );
+    return Array.from(pressed, el => el.textContent.trim());
   }
 
   // ─────────────────────────────────────────────
@@ -340,7 +360,11 @@
     });
     console.groupEnd();
 
-    return filtered.slice(0, 3);
+    // candidates.length is what the rationale block reports to the
+    // customer ("منهم ٦٨ يناسبوا النوع اللي اخترته"). Returning it here
+    // rather than recomputing the gender filter elsewhere keeps that
+    // number and the actual filter from ever drifting apart.
+    return { picks: filtered.slice(0, 3), candidateCount: candidates.length };
   }
 
   // ─────────────────────────────────────────────
@@ -385,6 +409,56 @@
     });
   }
 
+  // ─────────────────────────────────────────────
+  // Rationale — why these three
+  //
+  // The matching logic already explains itself, but only to the console.
+  // This says the same thing to the customer, and every claim it makes
+  // is checkable against scorePerfumes(): scent family first (+5/+3/+1),
+  // then occasion (+4), then season (+3), with disliked notes at -10
+  // each and anything at or below zero dropped.
+  // ─────────────────────────────────────────────
+
+  /* The four single-select answers, in the order the quiz asked them. */
+  const RATIONALE_ROWS = [
+    { key: 'gender',   label: 'النوع' },
+    { key: 'scent',    label: 'الريحة' },
+    { key: 'occasion', label: 'المناسبة' },
+    { key: 'season',   label: 'الموسم' },
+  ];
+
+  /** Arabic marks the dual, so a bare numeral reads wrong at one and
+   *  two — "أقرب ١ لاختياراتك" is not a sentence anyone would say. */
+  function picksPhrase(n) {
+    if (n === 1) return 'ده أقرب عطر لاختياراتك.';
+    if (n === 2) return 'دول أقرب عطرين لاختياراتك.';
+    return `دول أقرب ${arNum(n)} عطور لاختياراتك.`;
+  }
+
+  function buildRationale(inStock, candidateCount) {
+    const rows = RATIONALE_ROWS
+      .map(row => ({ label: row.label, value: chosenLabel(row.key) }))
+      .filter(row => row.value);
+
+    // "مفيش، بحب كل حاجة" is a stated preference, not a list of
+    // dislikes — scorePerfumes skips the penalty entirely for it, so
+    // neither the row nor the sentence below may claim it ran.
+    const avoiding = answers.dislikes.includes('nothing') ? [] : chosenDislikeLabels();
+    if (avoiding.length) rows.push({ label: 'بتتجنب', value: avoiding.join('، ') });
+
+    rationaleChoices.innerHTML = rows
+      .map(row => `<dt>${esc(row.label)}</dt><dd>${esc(row.value)}</dd>`)
+      .join('');
+
+    rationaleText.textContent =
+      `بدأنا من ${arNum(inStock)} عطر متاح دلوقتي، منهم ${arNum(candidateCount)} ` +
+      'يناسبوا النوع اللي اخترته. رتبناهم بعد كده حسب أهمية اختياراتك: ' +
+      'العائلة العطرية الأول، بعدها المناسبة، بعدها الموسم' +
+      (avoiding.length
+        ? ' — وأي عطر فيه ريحه من الحاجات الي مش بتحبها اتأخر في الترتيب او اتشال خالص.'
+        : '.');
+  }
+
   function setView(view) {
     masthead.dataset.view = view;
     quiz.hidden = view !== 'quiz';
@@ -393,7 +467,7 @@
   }
 
   function showResults() {
-    const picks = scorePerfumes();
+    const { picks, candidateCount } = scorePerfumes();
 
     if (!picks.length) {
       setView('empty');
@@ -406,8 +480,11 @@
 
     resultsGrid.innerHTML = picks.map(perfumeCard).join('');
     watchImages(resultsGrid);
-    resultsNote.textContent =
-      `من ${arNum(inStock)} عطر متاح، دي أقرب ${arNum(picks.length)} لاختياراتك.`;
+
+    // The funnel figures live in the rationale block below, so this
+    // line only frames the three cards.
+    resultsNote.textContent = picksPhrase(picks.length);
+    buildRationale(inStock, candidateCount);
 
     setView('results');
     resultsTitle.focus();
@@ -428,6 +505,8 @@
     document.querySelectorAll('[aria-pressed]').forEach(o => o.setAttribute('aria-pressed', 'false'));
     btnFinish.disabled = true;
     resultsGrid.innerHTML = '';
+    rationaleChoices.innerHTML = '';
+    rationaleText.textContent = '';
 
     setView('quiz');
     showStep(1, true);
