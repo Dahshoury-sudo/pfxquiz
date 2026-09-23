@@ -209,7 +209,10 @@ img {
   outline: none;
 }
 
-.question-title::after {
+/* The rule closes the question block, so it hangs off .question
+   rather than the title — otherwise it lands between the heading and
+   its note on the steps that carry one. */
+.question::after {
   content: '';
   display: block;
   width: 40px;
@@ -219,7 +222,7 @@ img {
 }
 
 .question-note {
-  margin-block-start: 14px;
+  margin-block-start: 12px;
   font-size: 0.9375rem;
   color: var(--muted);
 }
