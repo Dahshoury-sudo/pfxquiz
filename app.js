@@ -53,13 +53,9 @@
   // ─────────────────────────────────────────────
   // DOM refs
   // ─────────────────────────────────────────────
-  const masthead     = document.getElementById('masthead');
   const quiz         = document.getElementById('quiz');
   const results      = document.getElementById('results');
   const empty        = document.getElementById('empty');
-  const progressBar  = document.querySelector('.progress');
-  const progressFill = document.getElementById('progressFill');
-  const stepNow      = document.getElementById('stepNow');
   const resultsGrid  = document.getElementById('resultsGrid');
   const resultsNote  = document.getElementById('resultsNote');
   const resultsTitle = document.getElementById('resultsTitle');
@@ -116,14 +112,7 @@
     return Array.from(pressed, el => el.textContent.trim());
   }
 
-  // ─────────────────────────────────────────────
-  // Progress
-  // ─────────────────────────────────────────────
-  function updateProgress() {
-    progressFill.style.width = (currentStep / TOTAL_STEPS) * 100 + '%';
-    progressBar.setAttribute('aria-valuenow', String(currentStep));
-    stepNow.textContent = arNum(currentStep, 2);
-  }
+
 
   // ─────────────────────────────────────────────
   // Step navigation
@@ -148,7 +137,7 @@
       }
     }
 
-    updateProgress();
+
     scrollToTop();
   }
 
@@ -460,7 +449,6 @@
   }
 
   function setView(view) {
-    masthead.dataset.view = view;
     quiz.hidden = view !== 'quiz';
     results.hidden = view !== 'results';
     empty.hidden = view !== 'empty';

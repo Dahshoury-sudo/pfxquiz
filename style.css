@@ -97,73 +97,11 @@ img {
   border-radius: 1px;
 }
 
-/* On the green band the green ring would disappear into the ground. */
-.masthead :focus-visible {
-  outline-color: var(--gold);
-}
 
-/* ═══════════════════════════════════════════
-   MASTHEAD
-   ═══════════════════════════════════════════ */
 
-.masthead {
-  position: sticky;
-  top: env(safe-area-inset-top, 0px);
-  z-index: 10;
-  background: var(--green-deep);
-}
 
-.masthead-inner {
-  max-width: var(--measure-wide);
-  margin-inline: auto;
-  padding: 16px 20px 15px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-}
 
-/* Latin micro-label. Tracking belongs here and nowhere near the
-   Arabic — Arabic is cursive and letter-spacing severs the joins. */
-.wordmark {
-  font-family: var(--font-lat);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ivory);
-}
 
-.step-counter {
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(250, 248, 244, 0.65);
-  font-variant-numeric: tabular-nums;
-}
-
-.step-counter .now {
-  color: var(--gold);
-  font-weight: 700;
-}
-
-/* Hairline progress. The counter already states how many steps there
-   are, so this only has to carry position — no dots. */
-.progress {
-  height: 2px;
-  background: var(--green-dim);
-}
-
-.progress-fill {
-  height: 100%;
-  width: 20%;
-  background: var(--gold);
-  transition: width 400ms var(--ease);
-}
-
-.masthead[data-view="results"] .step-counter,
-.masthead[data-view="results"] .progress-fill {
-  display: none;
-}
 
 /* ═══════════════════════════════════════════
    QUIZ
