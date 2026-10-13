@@ -232,13 +232,14 @@
     </div>
   </section>
 
-  <script src="perfumes.js"></script>
-  <script src="app.js"></script>
-
-  <!-- Vercel Web Analytics -->
+  <!-- Vercel Web Analytics — the queue shim comes before both the insights
+       script and app.js, so no track() call can arrive before it exists. -->
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
+
+  <script src="perfumes.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

@@ -42,6 +42,7 @@
 
   let currentStep = 1;
   let advanceTimer = null;
+  let hasStarted = false;
 
   const answers = {
     gender: null,      // step 1
@@ -120,7 +121,27 @@
     return Array.from(pressed, el => el.textContent.trim());
   }
 
-
+  // ─────────────────────────────────────────────
+  // Analytics
+  //
+  // Vercel Web Analytics is injected as plain script tags in index.html,
+  // so window.va is the whole API — the npm `track` helper isn't loaded.
+  // Everything funnels through here so the quiz logic never names a
+  // provider, and a second one can be added in this spot alone.
+  //
+  // Custom events need a Pro plan, and plain Pro caps custom data at two
+  // properties per event. Nested objects and arrays are rejected outright,
+  // so anything like `dislikes` would have to be flattened to a string.
+  // ─────────────────────────────────────────────
+  function track(name, data) {
+    try {
+      if (typeof window.va === 'function') {
+        window.va('event', data ? { name: name, data: data } : { name: name });
+      }
+    } catch (err) {
+      // Measurement must never break the quiz.
+    }
+  }
 
   // ─────────────────────────────────────────────
   // Step navigation
@@ -189,6 +210,14 @@
       option.setAttribute('aria-checked', 'true');
       answers[key] = option.dataset.value;
       syncRovingTabindex(group);
+
+      // There's no intro screen, so the first answer — not the page load —
+      // is the first real sign of engagement. The flag stops a re-tap, or a
+      // trip back through the steps, from counting as a second start.
+      if (!hasStarted) {
+        hasStarted = true;
+        track('quiz_started');
+      }
 
       clearTimeout(advanceTimer);
       advanceTimer = setTimeout(goNext, ADVANCE_DELAY);
@@ -396,7 +425,8 @@
           <h2 class="perfume-name">${esc(p.name)}</h2>
           <p class="perfume-notes">${esc(notes)}</p>
           <p class="perfume-desc">${esc(p.description)}</p>
-          <a class="perfume-cta" href="${esc(p.url)}" target="_blank" rel="noopener">
+          <a class="perfume-cta" href="${esc(p.url)}" target="_blank" rel="noopener"
+             data-perfume-name="${esc(p.name)}" data-rank="${index + 1}">
             <span>اطلب الآن</span>${CTA_ARROW}
           </a>
         </div>
@@ -471,6 +501,11 @@
   function showResults() {
     const { picks, candidateCount } = scorePerfumes();
 
+    // Fires on the empty state too, as `results: 0`. Answering all five
+    // questions is a finish whether or not the catalogue had anything to
+    // offer, and the count keeps the two apart without a second event name.
+    track('quiz_completed', { results: picks.length });
+
     if (!picks.length) {
       setView('empty');
       emptyTitle.focus();
@@ -499,6 +534,15 @@
   // Restart
   // ─────────────────────────────────────────────
   function restart() {
+    // Read the view before setView swaps it out — it's what separates
+    // "didn't like the three picks" from "got no matches at all".
+    track('quiz_restarted', { from: results.hidden ? 'empty' : 'results' });
+
+    // A restart is a fresh attempt: showResults will fire quiz_completed
+    // again, so quiz_started has to be allowed to fire again too, or the
+    // two halves of the funnel stop being comparable.
+    hasStarted = false;
+
     answers.gender = null;
     answers.scent = null;
     answers.occasion = null;
@@ -559,6 +603,20 @@
     document.querySelectorAll('.js-back').forEach(btn => btn.addEventListener('click', goBack));
     document.querySelectorAll('.js-restart').forEach(btn => btn.addEventListener('click', restart));
     btnFinish.addEventListener('click', showResults);
+
+    // The cards are rebuilt with innerHTML on every run, so the CTA click is
+    // caught by delegation rather than by re-binding three listeners each
+    // time. The link opens a new tab, so the page is never unloaded and the
+    // event has time to send.
+    resultsGrid.addEventListener('click', e => {
+      const cta = e.target.closest('.perfume-cta');
+      if (!cta || !resultsGrid.contains(cta)) return;
+
+      track('perfume_clicked', {
+        perfume: cta.dataset.perfumeName,
+        rank: Number(cta.dataset.rank),
+      });
+    });
 
     setupIframeBridge();
     showStep(1, false);
